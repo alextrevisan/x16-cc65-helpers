@@ -1,0 +1,3 @@
+D:/X16/KINGDOMS2/build/CMakeFiles/KINGDOMS.dir
+D:/X16/KINGDOMS2/build/CMakeFiles/edit_cache.dir
+D:/X16/KINGDOMS2/build/CMakeFiles/rebuild_cache.dir

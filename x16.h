@@ -49,4 +49,33 @@ void mode80col ()
     }
 }
 
+typedef void irqfunction(void);
+
+void initialize(irqfunction *irq)
+{
+    // switch back to uppercase character set
+    __asm__("lda #$8e");
+    __asm__("jsr BSOUT");
+
+    // disable interrupts
+    __asm__("sei");
+
+    // bad hack: redefine CC65 stack from $0xa800-0xaff, should be a proper x16 custom target
+    *((uint8_t*) 0x02) = 0x00;
+    *((uint8_t*) 0x03) = 0xb0;
+    if (irq)
+    {
+        *((uint8_t*) 0x0314) = (uint8_t) (((uint16_t) irq) & 0xff);
+        *((uint8_t*) 0x0315) = (uint8_t) ((((uint16_t) irq) >> 8) & 0xff);
+    }
+
+    // set new interrupt function
+    //*((uint8_t*) 0x0314) = (uint8_t) (((uint16_t) irq) & 0xff);
+    //*((uint8_t*) 0x0315) = (uint8_t) ((((uint16_t) irq) >> 8) & 0xff);
+
+
+// enable interrupts
+    __asm__("cli");
+}
+
 #endif // X16_H
