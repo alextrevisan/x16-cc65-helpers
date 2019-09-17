@@ -100,41 +100,23 @@ void clearline()
 #define KEY_FORWARD 'w'
 #define KEY_BACK 's'
 /***/
-
-static int playerx = 8*256;
-static int playery = 8*256;
+static int playeroldx = 10240;
+static int playeroldy = 7680;
+static int playerx = 10240;
+static int playery = 7680;
 static int16_t playera = 0;
 static char turnLeftSpeed = 0;
 static char turnRightSpeed = 0;
+static int oldca = 0, oldsa = 0;
 
-static const char* map[] =
-{
-    "################",
-    "#              #",
-    "#              #",
-    "#              #",
-    "#              #",
-    "#              #",
-    "#              #",
-    "#              #",
-    "#              #",
-    "#              #",
-    "#              #",
-    "#              #",
-    "#              #",
-    "#              #",
-    "#              #",
-    "################",
-};
-static const uint16_t nScreenWidth = 80*256;
-static const u  int16_t nScreenHeight = 60*256;
-//3.14159 * 256 = 804 / 4 = 201
-static int fFOV = 201;
-static int16_t fRayAngle = 0;
+static int vx0 = 70*256;
+static int vx1 = 70*256;
+static int vy0 = 20*256;
+static int vy1 = 50*256;
+static int tx1, tx2, ty1, ty2, tz1, tz2;
 
 int main()
 {
-    uint16_t x;
     initialize(irq);
 
     for(;;)
@@ -165,11 +147,14 @@ int main()
             turnLeftSpeed = 0;
             turnRightSpeed = 0;
         }
-
+        oldca = cosa;
+        oldsa = sina;
         playera = playera > 359 ? 0 : playera;
         playera = playera < 0 ? 359 : playera;
         setCameraAngle(playera);
 
+        playeroldx = playerx;
+        playeroldy = playery;
         if (currentKey == KEY_MOVELEFT)
         {
             playerx += sina;
@@ -202,11 +187,25 @@ int main()
             //printf("%d, %d\n", playerx, playery);
         }
 
-        for (x=0;x < nScreenWidth; x+=256)
-        {
-            fRayAngle = (playera - fFOV/2) + ((x/(nScreenWidth/256))*fFOV)/256;
-        }
-        printf("%d\n", fRayAngle/256);
+        tx1 = vx0 - playerx;
+        tx2 = vx1 - playerx;
+
+        ty1 = vy0 - playery;
+        ty2 = vy1 - playery;
+
+        tz1 = (tx1 * cosa)/256 + (ty1 * sina)/256;
+        tz2 = (tx2 * cosa)/256 + (ty2 * sina)/256;
+        tx1 = (tx1 * sina)/256 - (ty1 * cosa)/256;
+        tx2 = (tx2 * sina)/256 - (ty2 * cosa)/256;
+
+        line(70 - tx1/256, 20 - tz1/256, 70 - tx2/256, 50 - tz2/256, 0x80+' ');
+        //printf("%d - %d\n",70 - (tx1/256), 20 - tz1/256);
+        //cline(playerx/256, playery/256, 30, 30);
+        //line(vx0, vy0, vx1, vy1, 0x80+' ');
+
+        line(playeroldx/256, playeroldy/256, (oldca*5+playeroldx)/256, (oldsa*5+playeroldy)/256, ' ');
+        line(playerx/256, playery/256, (cosa*5+playerx)/256, (sina*5+playery)/256, 0x80+' ');
+        line(40, 30, 45, 30, 0x80+' ');
     }
 
     return 0;
