@@ -1,9 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <peekpoke.h>
-#include <conio.h>
+//#include <peekpoke.h>
+//#include <conio.h>
 #include <string.h>
 #include "x16.h"
+
+#define POKE(addr,val)     (*(unsigned char*) (addr) = (val))
+#define POKEW(addr,val)    (*(unsigned*) (addr) = (val))
+#define PEEK(addr)         (*(unsigned char*) (addr))
+#define PEEKW(addr)        (*(unsigned*) (addr))
+
 
 //void (*readkey)(void) = (void (*)(void)) 0xFF5F;
 //void (*getkey)(void) = (void (*)(void)) 0xFFE4;
@@ -127,7 +133,7 @@ static const char* map[] =
     "################",
 };
 static const uint16_t nScreenWidth = 80*256;
-static const u  int16_t nScreenHeight = 60*256;
+static const uint16_t nScreenHeight = 60*256;
 //3.14159 * 256 = 804 / 4 = 201
 static int fFOV = 201;
 static int16_t fRayAngle = 0;
