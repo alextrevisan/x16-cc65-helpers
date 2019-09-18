@@ -1,7 +1,7 @@
 #ifndef LOGMATH_H
 #define LOGMATH_H
 
-#include <cc65.h>
+//#include <cc65.h>
 
 static int angle;
 static int sina;
