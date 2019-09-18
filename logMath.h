@@ -52,24 +52,5 @@ void line(int x0, int y0, int x1, int y1, uint8_t v) {
   }
 }
 
-int16_t mul(int16_t value, int16_t v)
-{
-    return value * v/256;
-}
-
-int16_t div(int16_t value, int16_t v)
-{
-    return (int16_t)(value / (v / 256));
-}
-
-int16_t add(int16_t value, int16_t v)
-{
-    return value + v;
-}
-
-int16_t sub(int16_t value, int16_t v)
-{
-    return value - v;
-}
 
 #endif // LOGMATH_H

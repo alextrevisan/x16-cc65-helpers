@@ -1,22 +1,42 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <peekpoke.h>
-#include <conio.h>
 #include <string.h>
-#include "x16.h"
+#include <stdint.h>
 
-//void (*readkey)(void) = (void (*)(void)) 0xFF5F;
-//void (*getkey)(void) = (void (*)(void)) 0xFFE4;
 void (*printkey)(void) = (void (*)(void)) 0xFFD2;
-//int8_t __fastcall__ strcmp2(char s1[], char s2[]);
-//int strcmp (const char* s1, const char* s2);
+
 int printvalue = 0;
 char readtxt[32];
 static uint8_t currentKey = 0;
+
+struct VERA_t
+{
+    uint8_t hi;
+    uint8_t mid;
+    uint8_t lo;
+    uint8_t data1;
+    uint8_t data2;
+    uint8_t ctrl;
+};
+
+#define VERA (*(volatile struct VERA_t*) 0x9f20)
+
+static void vpoke(uint8_t bank, uint16_t address, uint8_t data)
+{
+    // address selection 0
+    VERA.ctrl = 0;
+    // set address
+    VERA.hi = bank;
+    VERA.mid = address >> 8;
+    VERA.lo = address & 0xff;
+    // store data with data port 1
+    VERA.data1 = data;
+}
+
 void getkey()
 {
-    __asm__("JSR $FFE4");
-    __asm__("STA %v", currentKey);
+    asm("JSR $FFE4");
+    asm("STA %0": "=r"(currentKey));
 }
 static void irq()
 {
@@ -31,14 +51,45 @@ static void irq()
 
 }
 
-int __fastcall__ strcmp2 (const char* s1, const char* s2);
+void printc(register char c)
+{
+    asm("JSR $FFD2");
+    return;
+}
 
-void __fastcall__ printc(char)
+
+int main()
+{
+	asm("lda #$8e");
+    asm("jsr $FFD2");
+
+    // bad hack: redefine CC65 stack from $0xa800-0xaff, should be a proper x16 custom target
+    *((uint8_t*) 0x02) = 0x00;
+    *((uint8_t*) 0x03) = 0xb0;
+	while (!currentKey)
+	{
+		getkey();
+	}
+	
+	for(uint8_t y = 0; y < 60; ++y)
+	{
+		for(uint8_t x = 0; x < 80; ++x)
+		{
+			vpoke(0, y*256+x*2, currentKey);
+		}
+	}
+	
+	return 0;
+}
+
+//int __fastcall__ strcmp2 (const char* s1, const char* s2);
+/*
+void printc(char c)
 {
     __asm__("JSR $FFD2");
     return;
 }
-void __fastcall__ print(char readtxt[])
+void print(char readtxt[])
 {
     static uint8_t idx = 0;
     for(idx = 0; readtxt[idx]!='\0'; idx++)
@@ -53,7 +104,7 @@ void clearline()
     {
         readtxt[line] = '\0';
     }
-}
+}*/
 /*int8_t __fastcall__ strcmp2(char s1[], char s2[])
 {
     static int8_t s1s = 0;
@@ -91,7 +142,7 @@ void clearline()
     c = '\0';
 }*/
 #pragma static-locals(on)
-#include "logMath.h"
+//#include "logMath.h"
 
 #define KEYTURNLEFT 'q'
 #define KEYTURNRIGHT 'e'
@@ -100,7 +151,7 @@ void clearline()
 #define KEY_FORWARD 'w'
 #define KEY_BACK 's'
 /***/
-
+/*
 static int playerx = 8*256;
 static int playery = 8*256;
 static int16_t playera = 0;
@@ -268,3 +319,4 @@ int main()
 
     return 0;
 }
+*/
